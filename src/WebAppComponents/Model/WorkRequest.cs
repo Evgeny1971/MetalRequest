@@ -1,0 +1,4 @@
+namespace eShop.WebAppComponents.Model
+{
+
+}
