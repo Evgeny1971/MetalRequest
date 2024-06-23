@@ -6,6 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddSingleton<CacheService>();
+builder.Services.AddSingleton<EmailService>();
 
 builder.AddApplicationServices();
 

@@ -1,0 +1,332 @@
+﻿@using Microsoft.JSInterop
+@inject NavigationManager Nav
+
+@page "/metalwork/workrequest/{id:int}"
+@page "/metalwork/workrequest"
+
+@using eShop.ServiceDefaults;
+
+@inject EmailService emailService
+@inject CacheService cacheService
+
+@* @page "/item/{itemId:int}" *@
+@rendermode InteractiveServer
+@* @inject eShop.MetallFactorUI.Services.EmailService emailService *@
+@inject ILogger<WorkRequestEntity> _logger 
+@inject IJSRuntime JSRuntime
+
+<div class="container">
+    <div class="checkout">
+        <div class="form">
+            <div class="form-section">
+                <h2>Work Request Details</h2>
+                <div class="form-group">
+                    <label>Producer Categories:</label>
+                    <select class="form-control" @bind="selectedCategory">
+                        <option value="">Select a category</option>
+                        <option value="Welding">Welding</option>
+                        <option value="Metalworking">Metalworking</option>
+                        <option value="Sewing">Sewing</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Budget Range Selection:</label>
+                    <select class="form-control" @bind="selectedBudgetRange">
+                        <option value="">Select a budget range</option>
+                        <option value="Under $1,000">Under $1,000</option>
+                        <option value="$1,000 - $5,000">$1,000 - $5,000</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Quantity Specification:</label>
+                    <InputNumber class="form-control" @bind-Value="quantity" />
+                </div>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <InputText class="form-control" @bind-Value="exampleData" />
+                </div>                
+                <div class="form-group">
+                    <label>Payment Methods:</label>
+                    <select class="form-control" @bind="selectedPaymentMethod">
+                        <option value="">Select a payment method</option>
+                        <option value="Prepayment">Prepayment</option>
+                        <option value="Partial Prepayment">Partial Prepayment</option>
+                        <option value="Payment upon Completion">Payment upon Completion</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Source of Materials for Work:</label>
+                    <select class="form-control" @bind="selectedMaterialSource">
+                        <option value="">Select a source of materials</option>
+                        <option value="Supplier Provided">Supplier Provided</option>
+                        <option value="Client Provided">Client Provided</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Delivery Options:</label>
+                    <select class="form-control" @bind="selectedDeliveryOption">
+                        <option value="">Select a delivery option</option>
+                        <option value="Standard Delivery">Standard Delivery</option>
+                        <option value="Express Delivery">Express Delivery</option>
+                        <option value="Pickup">Pickup</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Delivery Deadlines:</label>
+                    <InputDate class="form-control" @bind-Value="deliveryDeadline" />
+                </div>
+
+                <div class="checkbox">
+                    <InputCheckbox @bind-Value="penaltyAgreement" />
+                    <label>I agree to the penalties stipulated for delivery delays.</label>
+                </div>
+
+                <div class="checkbox">
+                    <InputCheckbox @bind-Value="bonusAgreement" />
+                    <label>I agree to receive bonuses for early delivery.</label>
+                </div>
+
+                <div class="checkbox">
+                    <InputCheckbox @bind-Value="arbitrationAgreement" />
+                    <label>I agree to the appointment of an arbitrator for disputes.</label>
+                </div>
+
+                <div class="form-group">
+                    <label>File Attachment:</label>
+                    <InputFile @bind-Value="file" />
+                </div>
+
+                <div class="form-group">
+                    <label>Additional Information:</label>
+                    <InputTextArea class="form-control" @bind-Value="additionalInfo" />
+                </div>
+
+                <button class="btn btn-primary" style="width:200px" @onclick="SubmitForm">
+                    @{
+                        if (!id.HasValue)
+                        {
+                            <text>Send work request</text>;
+                        }
+                        else
+                        {
+                            <text>Confirm work request</text>;
+                        }
+                    }
+                </button>
+            </div>
+        </div>
+
+        <div class="form">
+            <div class="form-section">
+                <h2>Shipping address</h2>
+
+                <div class="form-group">
+                    <label>Address:</label>
+                    <InputText class="form-control" @bind-Value="shippingAddress" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>City:</label>
+                        <InputText class="form-control" @bind-Value="shippingCity" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>State:</label>
+                        <InputText class="form-control" @bind-Value="shippingState" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    public class WorkRequestEntity
+    {
+        public int Id { get; set; }
+        public string? SelectedCategory { get; set; }
+        public string? SelectedBudgetRange { get; set; }
+        public int Quantity { get; set; }
+        public string? ExampleData { get; set; }
+        public string? SelectedPaymentMethod { get; set; }
+        public string? SelectedMaterialSource { get; set; }
+        public string? SelectedDeliveryOption { get; set; }
+        public DateTime DeliveryDeadline { get; set; }
+        public bool PenaltyAgreement { get; set; }
+        public bool BonusAgreement { get; set; }
+        public bool ArbitrationAgreement { get; set; }
+        public string? AdditionalInfo { get; set; }
+        public string? ShippingAddress { get; set; }
+        public string? ShippingCity { get; set; }
+        public string? ShippingState { get; set; }
+    }
+
+    // Define your model properties here
+    [Parameter]
+    public int? id { get; set; }
+    private string? selectedCategory;
+    private string? selectedBudgetRange;
+    private string? shippingAddress;
+    private string? shippingCity;
+    private string? shippingState;
+    private int quantity;
+    //private string email;
+    private string? selectedPaymentMethod;
+    private string? selectedMaterialSource;
+    private string? selectedDeliveryOption;
+    private DateTime deliveryDeadline;
+    private bool penaltyAgreement;
+    private bool bonusAgreement;
+    private bool arbitrationAgreement;
+    private IBrowserFile? file;
+    private string? additionalInfo;
+    //private bool formSubmitted = false;
+    private string? exampleData;
+    //private EmailRequestDTO? emailRequest;
+    private string cacheKey = "unique-id";
+    private int id_local;
+
+
+    public static string Url(NavigationManager nav)
+        => $"metalwork/workrequest";
+
+    public static string UrlLink(NavigationManager nav)
+            => nav.Uri;
+
+    /// this event occurrence first
+    protected override void OnInitialized()
+    {
+        
+        if (cacheService == null)
+        {
+            cacheService = new CacheService();
+            //var builder = WebApplication.CreateBuilder();
+            //builder.Services.AddSingleton<CacheService>();
+
+        }
+        /// if new increment cache.count
+        id_local =(id.HasValue? id.Value: cacheService.Count+1);
+        cacheKey = $"cach_key_id_{id_local}";
+        //id=0;
+        if(id.HasValue)
+        {
+            //exampleData = "Test";// ExampleService.GetExampleData();
+            _logger.LogInformation($"OnInitialized, cacheKey:{cacheKey}");
+            WorkRequestEntity? workRequest = cacheService.Get<WorkRequestEntity>(cacheKey) as WorkRequestEntity;
+            if(workRequest != null)
+            {
+                _logger.LogInformation("workRequest is not null");
+                selectedCategory = workRequest.SelectedCategory;
+                selectedBudgetRange = workRequest.SelectedBudgetRange;
+                quantity = workRequest.Quantity;
+                exampleData = workRequest.ExampleData;
+                selectedPaymentMethod = workRequest.SelectedPaymentMethod;
+                selectedMaterialSource = workRequest.SelectedMaterialSource;
+                selectedDeliveryOption = workRequest.SelectedDeliveryOption;
+                deliveryDeadline = workRequest.DeliveryDeadline;
+                penaltyAgreement = workRequest.PenaltyAgreement;
+                bonusAgreement = workRequest.BonusAgreement;
+                arbitrationAgreement = workRequest.ArbitrationAgreement;
+                additionalInfo = workRequest.AdditionalInfo;
+                shippingAddress = workRequest.ShippingAddress;
+                shippingCity = workRequest.ShippingCity;
+                shippingState = workRequest.ShippingState;
+            }
+        }
+       ///
+    }
+ 
+    private async Task SubmitForm()
+    {
+        WorkRequestEntity? workRequest = new WorkRequestEntity
+           {
+            SelectedCategory = selectedCategory,
+            SelectedBudgetRange = selectedBudgetRange,
+            Quantity = quantity,
+            ExampleData = exampleData,
+            SelectedPaymentMethod = selectedPaymentMethod,
+            SelectedMaterialSource = selectedMaterialSource,
+            SelectedDeliveryOption = selectedDeliveryOption,
+            DeliveryDeadline = deliveryDeadline,
+            PenaltyAgreement = penaltyAgreement,
+            BonusAgreement = bonusAgreement,
+            ArbitrationAgreement = arbitrationAgreement,
+            AdditionalInfo = additionalInfo,
+            ShippingAddress = shippingAddress,
+            ShippingCity = shippingCity,
+            ShippingState = shippingState
+        };
+        _logger.LogInformation($"cacheKey before insert into cache:{cacheKey}");
+
+         cacheService.Set(cacheKey, workRequest, TimeSpan.FromMinutes(10));
+
+        _logger.LogInformation($"cacheKey after insert into cache:{cacheKey}");
+        SendEmail();
+
+        await Task.FromResult<string>("Test");
+    }
+
+    private void  SendEmail()
+    {
+
+        EmailRequestDTO emailRequestDTO = new()
+		{
+				From ="gen.vinnikov@gmail.com",
+				To=new string[]{"vika.vinnikov@gmail.com", 
+                                "gen.vinnikov@gmail.com",
+                                "V0508258626@gmail.com"},
+				Subject ="Test Subject",
+				Body="Test Body, Link to Confirm :" + 
+                Pages.MetalWork.WorkRequest.UrlLink(Nav)+$"/{id_local}",
+					SmtpServer="smtp.gmail.com",
+					Port =587,
+					UserName ="gen.vinnikov@gmail.com",
+					Password = @"xqqb dniv wflp odec"
+		};
+		EmailService mail = new EmailService();
+		mail.SendEmail(emailRequestDTO);
+    }
+    ///
+    protected override void OnAfterRender(bool firstRender)
+    {
+          // Display an alert after form submission
+        // await JSRuntime.InvokeVoidAsync("alert", "Email sent successfully!");
+        if (firstRender)
+        {
+            _logger.LogInformation($"Component rendered successfully,{firstRender} ");
+        }
+        else
+        {
+            // Try to get the data from the cache
+            _logger.LogInformation($"Component else rendered successfully,{firstRender} ");            
+        }
+    }
+
+    /*
+    protected  async Task test()
+    {
+        // Perform form submission logic here
+        formSubmitted = true;
+
+        emailRequest = new EmailRequestDTO
+                {
+                    To = new[] { "recipient@example.com" },
+                    Subject = "Test Email",
+                    Body = "This is a test email."
+                };
+        ///
+        _logger.LogInformation("SubmitForm");
+        await emailService.SendEmailAsync(emailRequest);        
+    }
+  */ 
+}
+
+
+
