@@ -1,7 +1,25 @@
 ﻿using eShop.AppHost;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowOrigin",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowCredentials()
+                   .AllowAnyHeader();
+        });
+});
+
+//app.UseCors("AllowOrigin");
 
 builder.AddForwardedHeaders();
 
@@ -16,7 +34,8 @@ var identityDb = postgres.AddDatabase("identitydb");
 var orderDb = postgres.AddDatabase("orderingdb");
 var webhooksDb = postgres.AddDatabase("webhooksdb");
 
-var launchProfileName = ShouldUseHttpForEndpoints() ? "http" : "https";
+//var launchProfileName = ShouldUseHttpForEndpoints() ? "http" : "https";
+var launchProfileName = ShouldUseHttpForEndpoints() ? "http" : "http";
 
 // Services
 var identityApi = builder.AddProject<Projects.Identity_API>("identity-api", launchProfileName)

@@ -16,85 +16,93 @@
 @inject IJSRuntime JSRuntime
 
 <div class="container">
-    <div class="checkout">
+   <div class="checkout">
         <div class="form">
             <div class="form-section">
                 <h2>Work Request Details</h2>
+                <div class="container checkout">
+                    <h2>Producer Categories</h2>
+                    <div class="form-group">
+                        @foreach (var category in new string[] { "Welding", "Metalworking", "Sewing" })
+                        {
+                            <div class="form-check">
+                                <input type="radio" id="category-@category" name="category" value="@category" @onchange="(e) => selectedCategory = category" checked="@(selectedCategory == category)" class="form-check-input" />
+                                <label for="category-@category" class="form-check-label">@category</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <h2>Budget Range Selection:</h2>
                 <div class="form-group">
-                    <label>Producer Categories:</label>
-                    <select class="form-control" @bind="selectedCategory">
-                        <option value="">Select a category</option>
-                        <option value="Welding">Welding</option>
-                        <option value="Metalworking">Metalworking</option>
-                        <option value="Sewing">Sewing</option>
-                    </select>
+                    @foreach (var budget in new string[] { "Under $1,000", "$1,000 - $5,000" })
+                    {
+                        <div class="form-check">
+                            <input type="radio" id="budget-@budget" name="budget" value="@budget" @onchange="(e) => selectedBudgetRange = budget" checked="@(selectedBudgetRange == budget)" />
+                            <label for="budget-@budget">@budget</label>
+                        </div>
+                    }
                 </div>
 
+                <h2>Quantity Specification:</h2>
                 <div class="form-group">
-                    <label>Budget Range Selection:</label>
-                    <select class="form-control" @bind="selectedBudgetRange">
-                        <option value="">Select a budget range</option>
-                        <option value="Under $1,000">Under $1,000</option>
-                        <option value="$1,000 - $5,000">$1,000 - $5,000</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Quantity Specification:</label>
                     <InputNumber class="form-control" @bind-Value="quantity" />
                 </div>
+                 <h2>Email:</h2>
+
                 <div class="form-group">
-                    <label>Email:</label>
                     <InputText class="form-control" @bind-Value="exampleData" />
                 </div>                
                 <div class="form-group">
-                    <label>Payment Methods:</label>
-                    <select class="form-control" @bind="selectedPaymentMethod">
-                        <option value="">Select a payment method</option>
-                        <option value="Prepayment">Prepayment</option>
-                        <option value="Partial Prepayment">Partial Prepayment</option>
-                        <option value="Payment upon Completion">Payment upon Completion</option>
-                    </select>
+                    <h2>Payment Methods:</h2>
+                    @foreach (var method in new string[] { "Prepayment", "Partial Prepayment", "Payment upon Completion" })
+                    {
+                        <div class="form-check">
+                            <input type="radio" id="payment-@method" name="payment" value="@method" @onchange="(e) => selectedPaymentMethod = method" checked="@(selectedPaymentMethod == method)" />
+                            <label for="payment-@method">@method</label>
+                        </div>
+                    }
                 </div>
 
                 <div class="form-group">
-                    <label>Source of Materials for Work:</label>
-                    <select class="form-control" @bind="selectedMaterialSource">
-                        <option value="">Select a source of materials</option>
-                        <option value="Supplier Provided">Supplier Provided</option>
-                        <option value="Client Provided">Client Provided</option>
-                        <option value="Other">Other</option>
-                    </select>
+                    <h2>Source of Materials for Work:</h2>
+                    @foreach (var source in new string[] { "Supplier Provided", "Client Provided", "Other" })
+                    {
+                        <div class="form-check">
+                            <input type="radio" id="source-@source" name="materialSource" value="@source" @onchange="(e) => selectedMaterialSource = source" checked="@(selectedMaterialSource == source)" />
+                            <label for="source-@source">@source</label>
+                        </div>
+                    }
                 </div>
 
                 <div class="form-group">
-                    <label>Delivery Options:</label>
-                    <select class="form-control" @bind="selectedDeliveryOption">
-                        <option value="">Select a delivery option</option>
-                        <option value="Standard Delivery">Standard Delivery</option>
-                        <option value="Express Delivery">Express Delivery</option>
-                        <option value="Pickup">Pickup</option>
-                    </select>
+                    <h2>Delivery Options:</h2>
+                    @foreach (var option in new string[] { "Standard Delivery", "Express Delivery", "Pickup" })
+                    {
+                        <div class="form-check">
+                            <input type="radio" id="delivery-@option" name="delivery" value="@option" @onchange="(e) => selectedDeliveryOption = option" checked="@(selectedDeliveryOption == option)" />
+                            <label for="delivery-@option">@option</label>
+                        </div>
+                    }
                 </div>
 
                 <div class="form-group">
-                    <label>Delivery Deadlines:</label>
+                    <h2>Delivery Deadlines:</h2>
                     <InputDate class="form-control" @bind-Value="deliveryDeadline" />
                 </div>
 
                 <div class="checkbox">
                     <InputCheckbox @bind-Value="penaltyAgreement" />
-                    <label>I agree to the penalties stipulated for delivery delays.</label>
+                    <label for="penaltyAgreement">I agree to the penalties stipulated for delivery delays.</label>
                 </div>
 
                 <div class="checkbox">
                     <InputCheckbox @bind-Value="bonusAgreement" />
-                    <label>I agree to receive bonuses for early delivery.</label>
+                    <label for="bonusAgreement">I agree to receive bonuses for early delivery.</label>
                 </div>
 
                 <div class="checkbox">
                     <InputCheckbox @bind-Value="arbitrationAgreement" />
-                    <label>I agree to the appointment of an arbitrator for disputes.</label>
+                    <label for="arbitrationAgreement">I agree to the appointment of an arbitrator for disputes.</label>
                 </div>
 
                 <div class="form-group">
@@ -103,28 +111,17 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Additional Information:</label>
+                    <h2>Additional Information:</h2>
                     <InputTextArea class="form-control" @bind-Value="additionalInfo" />
                 </div>
 
-                <button class="btn btn-primary" style="width:200px" @onclick="SubmitForm">
-                    @{
-                        if (!id.HasValue)
-                        {
-                            <text>Send work request</text>;
-                        }
-                        else
-                        {
-                            <text>Confirm work request</text>;
-                        }
-                    }
-                </button>
+                <button class="btn btn-primary" @onclick="SubmitForm">Send Request</button>
             </div>
         </div>
 
         <div class="form">
             <div class="form-section">
-                <h2>Shipping address</h2>
+                <h2>Shipping Address</h2>
 
                 <div class="form-group">
                     <label>Address:</label>

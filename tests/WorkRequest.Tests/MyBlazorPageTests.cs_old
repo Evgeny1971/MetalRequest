@@ -1,0 +1,27 @@
+namespace BlazorApp.Tests;
+
+using eShop.WebApp.Components;
+using eShop.ServiceDefaults;
+
+using Bunit;
+using Xunit;
+//using WebApp.Pages; // Update this with the correct namespace
+using eShop.WebApp.Components.Pages.MetalWork;
+using Microsoft.Extensions.DependencyInjection;
+
+public class MyBlazorPageTests
+{
+    [Fact]
+    public void MyBlazorPageRendersCorrectly()
+    {
+        using var context = new TestContext();
+        context.Services.AddSingleton<CacheService>();
+        context.Services.AddSingleton<EmailService>();
+
+
+
+        var component = context.RenderComponent<WorkRequest>();
+        
+        Assert.Contains("I agree to the appointment of an arbitrator for disputes", component.Markup);
+    }
+}
