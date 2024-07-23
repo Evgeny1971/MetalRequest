@@ -7,10 +7,12 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Threading.Tasks;
 using Xunit;
-using eShop.WebApp.Components.Pages.MetalWork; // Update with the correct namespace
+using eShop.WebApp.Components.Pages.Item; // Update with the correct namespace
 using eShop.ServiceDefaults; // Update with the correct namespace
-
-public class WorkRequestTests_new
+//using eShop.WebAppComponents.Services;
+using eShop.WebAppComponents.Services;
+//using eShop.WebAppComponents.Services.IProductImageUrlProvider;
+public class ItemPageTest
 {
     [Fact]
     public async Task WorkRequestComponent_RendersCorrectly()
@@ -18,11 +20,15 @@ public class WorkRequestTests_new
         using var context = new TestContext();
 
         // Register the CacheService or any other required services
+        //context.AddServiceDefaults();
+
         context.Services.AddSingleton<CacheService>();
         context.Services.AddSingleton<EmailService>();
 
+        //context.AddApplicationServices();
+
         // Render the component
-        var component = context.RenderComponent<WorkRequest>();
+        var component = context.RenderComponent<ItemPage>();
 
         // Get the component markup
         var markup = component.Markup;
@@ -61,20 +67,22 @@ public class WorkRequestTests_new
                     app.UseRouting();
                     app.UseEndpoints(endpoints =>
                     {
-                        endpoints.MapGet("/81", async context =>
+                        endpoints.MapGet("/", async context =>
                         {
-                            var markup = context.RequestServices.GetService<string>();
+                            string? markup = context.RequestServices.GetService<string>();
                             context.Response.ContentType = "text/html";
+                            //await context.Response.WriteAsync(markup ?? string.Empty);
+                            //await context.Response.WriteAsync(markup);//, null, Encoding.UTF8);
                             await context.Response.WriteAsync($@"
                                 <html>
                                 <head>
-                                    <style>{System.IO.File.ReadAllText("../../../WorkRequest.razor.css")}</style>
+                                    <style>{System.IO.File.ReadAllText("../../../ItemPage.razor.css")}</style>
                                 </head>
                                 <body>
                                     {markup}
                                 </body>
                                 </html>");
-                       
+                                               
                         });
                     });
                 });
