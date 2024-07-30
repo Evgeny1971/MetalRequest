@@ -1,4 +1,8 @@
-﻿@using Microsoft.JSInterop
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using System.IO
+@* @using Microsoft.AspNetCore.Http *@
+
+@using Microsoft.JSInterop
 @inject NavigationManager Nav
 
 @page "/metalwork/workrequest/{id:int}"
@@ -107,7 +111,10 @@
 
                 <div class="form-group">
                     <label>File Attachment:</label>
-                    <InputFile @bind-Value="file" />
+
+                    @* <InputFile @bind-Value="file" /> *@
+                    <InputFile OnChange="HandleFileSelected" />
+
                 </div>
 
                 <div class="form-group">
@@ -163,6 +170,9 @@
         public string? ShippingAddress { get; set; }
         public string? ShippingCity { get; set; }
         public string? ShippingState { get; set; }
+
+        public IBrowserFile? File { get; set; }
+      
     }
 
     // Define your model properties here
@@ -183,6 +193,8 @@
     private bool bonusAgreement;
     private bool arbitrationAgreement;
     private IBrowserFile? file;
+    private string? filePath;
+
     private string? additionalInfo;
     //private bool formSubmitted = false;
     private string? exampleData;
@@ -235,6 +247,7 @@
                 shippingAddress = workRequest.ShippingAddress;
                 shippingCity = workRequest.ShippingCity;
                 shippingState = workRequest.ShippingState;
+                file = workRequest.File;
             }
         }
        ///
@@ -258,7 +271,8 @@
             AdditionalInfo = additionalInfo,
             ShippingAddress = shippingAddress,
             ShippingCity = shippingCity,
-            ShippingState = shippingState
+            ShippingState = shippingState,
+            File =file
         };
         _logger.LogInformation($"cacheKey before insert into cache:{cacheKey}");
 
@@ -290,6 +304,33 @@
 		EmailService mail = new EmailService();
 		mail.SendEmail(emailRequestDTO);
     }
+
+    protected async Task  HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        file = e.File;
+        if (file != null)
+        {
+            /// _logger.LogInformation($"File not null successfully: {file.Name}");
+
+            var fileName = Path.GetFileName(file.Name);
+            filePath = Path.Combine("Uploads", fileName);
+            try{
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.OpenReadStream().CopyToAsync(stream);
+                        //file.OpenReadStream().CopyTo(stream);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogInformation($"File failed uploaded: {ex.Message}");
+                    throw ex;
+                }
+ 
+            _logger.LogInformation($"File uploaded successfully: {filePath}");
+        }
+    }
+    
     ///
     protected override void OnAfterRender(bool firstRender)
     {
